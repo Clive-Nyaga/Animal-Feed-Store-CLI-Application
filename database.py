@@ -8,14 +8,18 @@ class DatabaseManager:
         self.session.close()
     
     # User operations
-    def create_user(self, name, role='user'):
-        user = User(name=name, role=role)
+    def create_user(self, username, name, password, role='user'):
+        user = User(username=username, name=name, password=password, role=role)
         self.session.add(user)
         self.session.commit()
         return user
     
-    def get_user_by_id(self, user_id):
-        return self.session.query(User).filter(User.id == user_id).first()
+    def authenticate_user(self, username, password):
+        user = self.session.query(User).filter(User.username == username).first()
+        return user if user and user.password == password else None
+    
+    def get_user_by_username(self, username):
+        return self.session.query(User).filter(User.username == username).first()
     
     def get_all_users(self):
         return self.session.query(User).all()

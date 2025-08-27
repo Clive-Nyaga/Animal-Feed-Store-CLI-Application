@@ -21,7 +21,12 @@ A terminal-based system for managing animal feed purchases and inventory using P
    pipenv shell
    ```
 
-3. Seed the database (optional):
+3. Run database migrations:
+   ```bash
+   alembic upgrade head
+   ```
+
+4. Seed the database (optional):
    ```bash
    python seed_data.py
    ```
@@ -48,9 +53,15 @@ python main.py
 
 ## Database Schema
 
-- **Users**: id, name, role
+- **Users**: id, username, name, password, role
 - **Feeds**: id, name, price, stock_quantity
 - **Transactions**: id, user_id, feed_id, quantity, total_price, date
+
+## Authentication
+
+- Users register with username and password
+- Login using username instead of ID
+- Admin credentials: Username=admin, Password=admin123
 
 ## Project Structure
 

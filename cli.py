@@ -18,25 +18,38 @@ class CLI:
     def login(self):
         print("\n1. Login")
         print("2. Register")
+        print("3. Exit")
         choice = input("Choose option: ")
         
         if choice == '1':
-            user_id = int(input("Enter your user ID: "))
-            user = self.db.get_user_by_id(user_id)
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+            user = self.db.authenticate_user(username, password)
             if user:
                 self.current_user = user
                 print(f"Welcome back, {user.name}!")
             else:
-                print("User not found!")
+                print("Invalid credentials!")
                 self.login()
         elif choice == '2':
+            username = input("Enter a username: ")
+            if self.db.get_user_by_username(username):
+                print("Username already exists!")
+                self.login()
+                return
             name = input("Enter your name: ")
+            password = input("Enter your password: ")
             role = input("Enter role (user/admin): ").lower()
             if role not in ['user', 'admin']:
                 role = 'user'
-            user = self.db.create_user(name, role)
+            user = self.db.create_user(username, name, password, role)
             self.current_user = user
-            print(f"Registration successful! Your ID is: {user.id}")
+            print(f"Registration successful! Username: {user.username}")
+        elif choice == '3':
+            self.logout()
+        else:
+            print("Invalid option!")
+            self.login()
     
     def user_menu(self):
         print(f"\n--- User Menu ({self.current_user.name}) ---")
@@ -45,7 +58,7 @@ class CLI:
         print("3. View My Transactions")
         print("4. Logout")
         
-        choice = input("Choose option: ")
+        choice = input("Choose option (or 'b' to go back): ")
         
         if choice == '1':
             self.view_feeds()
@@ -55,6 +68,8 @@ class CLI:
             self.view_my_transactions()
         elif choice == '4':
             self.logout()
+        elif choice.lower() == 'b':
+            return
         else:
             print("Invalid option!")
     
@@ -68,7 +83,7 @@ class CLI:
         print("6. View All Users")
         print("7. Logout")
         
-        choice = input("Choose option: ")
+        choice = input("Choose option (or 'b' to go back): ")
         
         if choice == '1':
             self.view_feeds()
@@ -84,6 +99,8 @@ class CLI:
             self.view_all_users()
         elif choice == '7':
             self.logout()
+        elif choice.lower() == 'b':
+            return
         else:
             print("Invalid option!")
     
@@ -99,8 +116,15 @@ class CLI:
     def purchase_feed(self):
         self.view_feeds()
         try:
-            feed_id = int(input("Enter feed ID to purchase: "))
-            quantity = int(input("Enter quantity: "))
+            feed_input = input("Enter feed ID to purchase (or 'b' to go back): ")
+            if feed_input.lower() == 'b':
+                return
+            feed_id = int(feed_input)
+            
+            quantity_input = input("Enter quantity (or 'b' to go back): ")
+            if quantity_input.lower() == 'b':
+                return
+            quantity = int(quantity_input)
             
             transaction = self.db.create_transaction(self.current_user.id, feed_id, quantity)
             if transaction:
@@ -172,7 +196,7 @@ class CLI:
         if users:
             print("\n--- All Users ---")
             for user in users:
-                print(f"ID: {user.id} | Name: {user.name} | Role: {user.role}")
+                print(f"Username: {user.username} | Name: {user.name} | Role: {user.role}")
         else:
             print("No users found!")
     

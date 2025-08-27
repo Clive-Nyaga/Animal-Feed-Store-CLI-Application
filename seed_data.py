@@ -4,8 +4,8 @@ def seed_database():
     db = DatabaseManager()
     
     # Create admin user
-    admin = db.create_user("Admin", "admin")
-    print(f"Admin created with ID: {admin.id}")
+    admin = db.create_user("admin", "Admin", "admin123", "admin")
+    print(f"Admin created - Username: {admin.username}")
     
     # Create sample feeds
     feeds_data = [
@@ -22,6 +22,7 @@ def seed_database():
     
     db.close()
     print("Database seeded successfully!")
+    print("Admin login: Username=admin, Password=admin123")
 
 if __name__ == "__main__":
     seed_database()

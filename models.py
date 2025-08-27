@@ -9,7 +9,9 @@ class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
+    username = Column(String(50), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
+    password = Column(String(100), nullable=False)
     role = Column(String(20), nullable=False, default='user')
     
     transactions = relationship("Transaction", back_populates="user")
@@ -39,5 +41,4 @@ class Transaction(Base):
 
 # Database setup
 engine = create_engine('sqlite:///animal_feed_store.db')
-Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
