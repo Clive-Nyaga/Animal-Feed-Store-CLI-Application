@@ -21,6 +21,9 @@ class DatabaseManager:
     def get_user_by_username(self, username):
         return self.session.query(User).filter(User.username == username).first()
     
+    def get_user_by_id(self, user_id):
+        return self.session.query(User).filter(User.id == user_id).first()
+    
     def get_all_users(self):
         return self.session.query(User).all()
     
