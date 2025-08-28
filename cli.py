@@ -160,8 +160,11 @@ class CLI:
             feeds = self.db.get_all_feeds()
             if feeds:
                 print("\n--- Available Feeds ---")
-                for feed in feeds:
-                    print(f"ID: {feed.id} | Name: {feed.name} | Price: ${feed.price:.2f} | Stock: {feed.stock_quantity}")
+                # Using list comprehension and tuple unpacking
+                feed_data = [(feed.id, feed.name, float(feed.price), feed.stock_quantity) for feed in feeds]
+                for feed_id, name, price, stock in feed_data:
+                    status = "In Stock" if stock > 0 else "Out of Stock"
+                    print(f"ID: {feed_id} | Name: {name} | Price: ${price:.2f} | Stock: {stock} | Status: {status}")
             else:
                 print("No feeds available!")
         except Exception as e:
@@ -313,8 +316,31 @@ class CLI:
             transactions = self.db.get_all_transactions()
             if transactions:
                 print("\n--- All Transactions ---")
+                # Using list of dictionaries for transaction data
+                transaction_list = []
                 for t in transactions:
-                    print(f"User: {t.user.name} ({t.user.username}) | Feed: {t.feed.name} | Qty: {t.quantity} | Total: ${t.total_price:.2f} | Date: {t.date.strftime('%Y-%m-%d %H:%M')}")
+                    transaction_dict = {
+                        'user': t.user.name,
+                        'username': t.user.username,
+                        'feed': t.feed.name,
+                        'quantity': t.quantity,
+                        'total': float(t.total_price),
+                        'date': t.date.strftime('%Y-%m-%d %H:%M')
+                    }
+                    transaction_list.append(transaction_dict)
+                
+                # Sort by date (most recent first)
+                transaction_list.sort(key=lambda x: x['date'], reverse=True)
+                
+                for trans in transaction_list:
+                    print(f"User: {trans['user']} ({trans['username']}) | Feed: {trans['feed']} | "
+                          f"Qty: {trans['quantity']} | Total: ${trans['total']:.2f} | Date: {trans['date']}")
+                
+                # Summary statistics using tuple
+                total_sales = sum(trans['total'] for trans in transaction_list)
+                total_items = sum(trans['quantity'] for trans in transaction_list)
+                summary = (len(transaction_list), total_items, total_sales)
+                print(f"\nSummary: {summary[0]} transactions, {summary[1]} items sold, ${summary[2]:.2f} total sales")
             else:
                 print("No transactions found!")
         except Exception as e:
@@ -325,9 +351,20 @@ class CLI:
             users = self.db.get_all_users()
             if users:
                 print("\n--- All Users ---")
+                # Using dictionary to organize user data
+                user_stats = {}
                 for user in users:
-                    transaction_count = len(self.db.get_user_transactions(user.id))
-                    print(f"Username: {user.username} | Name: {user.name} | Role: {user.role} | Transactions: {transaction_count}")
+                    transactions = self.db.get_user_transactions(user.id)
+                    user_stats[user.username] = {
+                        'name': user.name,
+                        'role': user.role,
+                        'transaction_count': len(transactions),
+                        'total_spent': sum(float(t.total_price) for t in transactions)
+                    }
+                
+                for username, stats in user_stats.items():
+                    print(f"Username: {username} | Name: {stats['name']} | Role: {stats['role']} | "
+                          f"Transactions: {stats['transaction_count']} | Total Spent: ${stats['total_spent']:.2f}")
             else:
                 print("No users found!")
         except Exception as e:
